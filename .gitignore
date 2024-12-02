@@ -1,0 +1,6 @@
+__pycache__/
+venv/
+install_scripts.sh/
+.DS_Store
+.env
+
