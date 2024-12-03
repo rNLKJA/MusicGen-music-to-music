@@ -7,6 +7,10 @@ from app.audio_analyzer import AudioAnalyzer
 import scipy.io.wavfile
 import io
 
+# Disable request timeout for long-running operations
+app.config['PERMANENT_SESSION_LIFETIME'] = 0  # Disable session timeout
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Disable static file cache timeout
+
 # Initialize AudioAnalyzer
 audio_analyzer = AudioAnalyzer()
 
