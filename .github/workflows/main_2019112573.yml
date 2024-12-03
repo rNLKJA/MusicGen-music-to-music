@@ -24,38 +24,38 @@ jobs:
         with:
           python-version: '3.10'
 
-      # Step 3: Install LLVM
-      - name: Install LLVM
+      # Step 3: Install correct LLVM version
+      - name: Install LLVM 10
         run: |
           sudo apt-get update
-          sudo apt-get install -y llvm
-        env:
-          DEBIAN_FRONTEND: noninteractive
+          sudo apt-get install -y wget
+          wget https://apt.llvm.org/focal/pool/main/l/llvm-toolchain-10/llvm-toolchain-10_10.0.1-1~ubuntu20.04_amd64.deb
+          sudo dpkg -i llvm-toolchain-10_10.0.1-1~ubuntu20.04_amd64.deb
+          sudo apt-get install -y llvm-10
 
       # Step 4: Create and activate a virtual environment
       - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-      
-      # Step 5: Install dependencies
+
+      # Step 5: Install dependencies with correct LLVM config
       - name: Install dependencies
         run: pip install -r requirements.txt
         env:
-          LLVM_CONFIG: /usr/bin/llvm-config
+          LLVM_CONFIG: /usr/bin/llvm-config-10
 
-      # Optional Step: Run tests (e.g., PyTest, Django test suites, etc.)
-      # Uncomment the following lines if tests are needed
+      # Step 6: Optional - Run tests (Uncomment if necessary)
       # - name: Run tests
       #   run: |
       #     source venv/bin/activate
       #     pytest
 
-      # Step 6: Package the application for deployment
+      # Step 7: Package the application for deployment
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
 
-      # Step 7: Upload the packaged application
+      # Step 8: Upload the packaged application
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
@@ -74,25 +74,25 @@ jobs:
       id-token: write # This is required for requesting the JWT
 
     steps:
-      # Step 8: Download the artifact
+      # Step 9: Download the artifact from the build job
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: python-app
 
-      # Step 9: Unzip the artifact
+      # Step 10: Unzip the artifact
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      # Step 10: Login to Azure
+      # Step 11: Login to Azure
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_9A91C921903448E09EA78F266690A57F }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_45018ABE7AD4484CBFFAE1DCF7E5E1AB }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9A832063DCCB40CE81F48538E3C329AF }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      # Step 11: Deploy the application
+      # Step 12: Deploy the application to Azure Web App
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
